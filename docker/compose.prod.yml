@@ -58,7 +58,7 @@ services:
   # Core Services - Production Mode (Scaled)
   # ─────────────────────────────────────────────────────────────────────────────
 
-  field_core:
+  field-management-service:
     environment:
       - NODE_ENV=production
       - LOG_LEVEL=warn
@@ -125,7 +125,7 @@ services:
   # AI Services - Production Mode
   # ─────────────────────────────────────────────────────────────────────────────
 
-  crop_health_ai:
+  crop-intelligence-service:
     environment:
       - LOG_LEVEL=WARN
       - ENVIRONMENT=production
@@ -148,7 +148,7 @@ services:
           cpus: '0.5'
           memory: 512M
 
-  yield_engine:
+  yield-prediction-service:
     environment:
       - LOG_LEVEL=WARN
       - ENVIRONMENT=production
