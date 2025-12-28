@@ -1,12 +1,12 @@
 # ═══════════════════════════════════════════════════════════════════════════════
-# SAHOOL Production Environment Override
-# Usage: docker compose -f docker-compose.yml -f docker/compose.prod.yml up
-# Or: make up-prod
+# SAHOOL Staging Environment Override
+# Usage: docker compose -f docker-compose.yml -f docker/compose.staging.yml up
+# Or: make up-staging
 # ═══════════════════════════════════════════════════════════════════════════════
 
 services:
   # ─────────────────────────────────────────────────────────────────────────────
-  # Infrastructure - Production Settings
+  # Infrastructure - Staging Settings
   # ─────────────────────────────────────────────────────────────────────────────
 
   postgres:
@@ -17,246 +17,174 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
-          memory: 2G
-        reservations:
           cpus: '1'
           memory: 1G
 
   redis:
-    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?REDIS_PASSWORD is required}", "--maxmemory", "1gb", "--maxmemory-policy", "allkeys-lru"]
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?REDIS_PASSWORD is required}"]
     deploy:
       resources:
         limits:
-          cpus: '1'
-          memory: 1G
-        reservations:
           cpus: '0.5'
           memory: 512M
 
   kong:
     environment:
       KONG_ADMIN_LISTEN: "127.0.0.1:8001"
-      KONG_NGINX_WORKER_PROCESSES: "4"
     deploy:
       resources:
         limits:
-          cpus: '1'
-          memory: 1G
-        reservations:
           cpus: '0.5'
           memory: 512M
 
-  nats:
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 512M
-
   # ─────────────────────────────────────────────────────────────────────────────
-  # Core Services - Production Mode (Scaled)
+  # Core Services - Staging Mode
   # ─────────────────────────────────────────────────────────────────────────────
 
-  field-management-service:
+  field_core:
     environment:
-      - NODE_ENV=production
-      - LOG_LEVEL=warn
+      - NODE_ENV=staging
+      - LOG_LEVEL=info
     deploy:
-      mode: replicated
-      replicas: 2
       resources:
         limits:
           cpus: '0.5'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
-      update_config:
-        parallelism: 1
-        delay: 10s
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
+          memory: 384M
 
   field_ops:
     environment:
-      - LOG_LEVEL=WARN
-      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+      - ENVIRONMENT=staging
     deploy:
-      mode: replicated
-      replicas: 2
       resources:
         limits:
           cpus: '0.5'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
+          memory: 384M
 
   ndvi_engine:
     environment:
-      - LOG_LEVEL=WARN
-      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+      - ENVIRONMENT=staging
     deploy:
       resources:
         limits:
-          cpus: '0.6'
-          memory: 768M
-        reservations:
-          cpus: '0.3'
-          memory: 384M
+          cpus: '0.5'
+          memory: 576M
 
   weather_core:
     environment:
-      - LOG_LEVEL=WARN
-      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+      - ENVIRONMENT=staging
     deploy:
       resources:
         limits:
-          cpus: '0.3'
-          memory: 256M
-        reservations:
-          cpus: '0.15'
-          memory: 128M
+          cpus: '0.25'
+          memory: 192M
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # AI Services - Production Mode
+  # AI Services - Staging Mode
   # ─────────────────────────────────────────────────────────────────────────────
 
-  crop-intelligence-service:
+  crop_health_ai:
     environment:
-      - LOG_LEVEL=WARN
-      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+      - ENVIRONMENT=staging
     deploy:
       resources:
         limits:
-          cpus: '1'
-          memory: 1G
-        reservations:
           cpus: '0.5'
           memory: 512M
 
   virtual_sensors:
     environment:
-      - LOG_LEVEL=WARN
-      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+      - ENVIRONMENT=staging
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: 512M
+          cpus: '0.25'
+          memory: 256M
 
-  yield-prediction-service:
+  yield_engine:
     environment:
-      - LOG_LEVEL=WARN
-      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+      - ENVIRONMENT=staging
     deploy:
       resources:
         limits:
           cpus: '0.5'
-          memory: 512M
+          memory: 384M
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # v15.3 Services - Production Mode (Main Crop Services)
+  # v15.3 Services - Staging Mode
   # ─────────────────────────────────────────────────────────────────────────────
 
   crop_growth_model:
     environment:
-      - NODE_ENV=production
-      - LOG_LEVEL=warn
+      - NODE_ENV=staging
+      - LOG_LEVEL=info
     deploy:
-      mode: replicated
-      replicas: 2
       resources:
         limits:
           cpus: '0.5'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
-      update_config:
-        parallelism: 1
-        delay: 10s
+          memory: 384M
 
   disaster_assessment:
     environment:
-      - NODE_ENV=production
-      - LOG_LEVEL=warn
+      - NODE_ENV=staging
+      - LOG_LEVEL=info
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 192M
+
+  lai_estimation:
+    environment:
+      - NODE_ENV=staging
+      - LOG_LEVEL=info
     deploy:
       resources:
         limits:
           cpus: '0.3'
-          memory: 256M
-        reservations:
-          cpus: '0.15'
-          memory: 128M
-
-  lai_estimation:
-    environment:
-      - NODE_ENV=production
-      - LOG_LEVEL=warn
-    deploy:
-      resources:
-        limits:
-          cpus: '0.4'
-          memory: 384M
-        reservations:
-          cpus: '0.2'
-          memory: 192M
+          memory: 288M
 
   yield_prediction:
     environment:
-      - NODE_ENV=production
-      - LOG_LEVEL=warn
+      - NODE_ENV=staging
+      - LOG_LEVEL=info
     deploy:
       resources:
         limits:
           cpus: '0.5'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
+          memory: 384M
 
   marketplace_service:
     environment:
-      - NODE_ENV=production
-      - LOG_LEVEL=warn
+      - NODE_ENV=staging
+      - LOG_LEVEL=info
     deploy:
-      mode: replicated
-      replicas: 2
       resources:
         limits:
-          cpus: '0.4'
-          memory: 384M
-        reservations:
-          cpus: '0.2'
-          memory: 192M
+          cpus: '0.3'
+          memory: 288M
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # Observability - Production
+  # Observability - Staging
   # ─────────────────────────────────────────────────────────────────────────────
 
   prometheus:
     deploy:
       resources:
         limits:
-          cpus: '1'
-          memory: 1G
-        reservations:
           cpus: '0.5'
           memory: 512M
 
   grafana:
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=false
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD is required}
     deploy:
       resources:
         limits:
           cpus: '0.5'
           memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
